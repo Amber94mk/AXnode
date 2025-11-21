@@ -3,18 +3,162 @@
  ************************************************************/
 const State = {
   projects: [],
-  evaluations: {}, // evaluations[projectId] = { ... }
+  evaluations: {},
 
   init() {
-    // 초기 샘플 프로젝트
+    // 1) 샘플 프로젝트 두 개
     this.projects = [
       {
         id: "p1",
-        name: "샘플 프로젝트 A",
-        description: "에너지·환경 프로젝트 PoC 예시",
+        name: "TEST 1: 산업통상자원부  연구 용역",
+        description: "산업통상자원부 에너지·정책 관련 연구용역 제안 PoC",
+      },
+      {
+        id: "p2",
+        name: "TEST 2: 한국수력원자력 중장기 재무 전망 추정 용역",
+        description: "한수원 중장기 재무전망·시나리오 분석 제안 PoC",
       },
     ];
+
+    // 2) 각 프로젝트별 미리 계산된 평가 결과
+    //    (세부 항목 점수 합계 → matchingScore와 일치하도록 설정)
+    this.evaluations = {
+      // ✅ TEST 1: 총점 69/80 → 매칭도 86%
+      p1: {
+        projectId: "p1",
+        rfpFileName: "2025_산업통상자원부_에너지정책_연구용역_RFP.pdf",
+        proposalFileName: "PwC_산업부_에너지전환_연구용역_제안서_v1.0.pdf",
+        matchingScore: 86, // 69/80 ≒ 86%
+        totalScore: 69,
+        totalMaxScore: 80,
+        factors: [
+          {
+            category: "기술·지식능력",
+            factor: "제안내용의 우수성 및 경쟁력",
+            maxScore: 15,
+            score: 13,
+          },
+          {
+            category: "기술·지식능력",
+            factor: "투입인력의 전문성 및 경험도",
+            maxScore: 15,
+            score: 14,
+          },
+          {
+            category: "인력·조직·관리기술",
+            factor: "참여인력의 적정성",
+            maxScore: 10,
+            score: 9,
+          },
+          {
+            category: "인력·조직·관리기술",
+            factor: "사업수행조직체계의 적정성",
+            maxScore: 10,
+            score: 10,
+          },
+          {
+            category: "사업 수행 계획",
+            factor: "추진목표 이해도 및 사업추진 전략",
+            maxScore: 10,
+            score: 8,
+          },
+          {
+            category: "사업 수행 계획",
+            factor: "수행일정의 합리성 및 수행절차의 적정성",
+            maxScore: 10,
+            score: 7,
+          },
+          {
+            category: "수행실적",
+            factor: "최근 3년간 동 분야 연구 실적",
+            maxScore: 10,
+            score: 8,
+          },
+        ],
+        strengths: [
+          "산업통상자원부가 요구하는 에너지전환 정책 방향과 주요 이슈를 정확히 짚고, 이를 기반으로 한 연구 질문과 접근 방법론이 명확하게 제시되어 있습니다.",
+          "핵심 투입인력 다수가 산업부·유관기관 연구 경험을 보유하고 있어 이해관계자 인터뷰·정책 제언의 실효성이 높게 평가됩니다.",
+        ],
+        gaps: [
+          "정량 모델링(수요·공급 시나리오, 온실가스 감축 효과 등)에 대한 세부 가정과 민감도 분석 계획이 요약 수준에 그쳐, 추가 설명이 있으면 설득력이 더 높아질 수 있습니다.",
+          "성과 확산·정책 반영 전략(워크숍 운영, 브리핑 구조 등)에 대한 로드맵이 상대적으로 간략히 제시되어 있습니다.",
+        ],
+        risks: [
+          "대외 변수(국제 에너지 가격, 규제 변화 등)에 따른 결과 값 변동성과 한계를 어떻게 커뮤니케이션할지에 대한 전략이 보완되지 않으면, 최종 산출물 해석 단계에서 논쟁 여지가 남을 수 있습니다.",
+        ],
+      },
+
+      // ✅ TEST 2: 배점 구조를 약간 다르게 + 총점 60/80 → 매칭도 75%
+      p2: {
+        projectId: "p2",
+        rfpFileName: "2025_한국수력원자력_중장기_재무전망_추정용역_RFP.pdf",
+        proposalFileName: "PwC_한수원_중장기_재무전망_시나리오_분석_제안서.pdf",
+        matchingScore: 75, // 60/80 = 75%
+        totalScore: 60,
+        totalMaxScore: 80,
+        factors: [
+          {
+            category: "기술·지식능력",
+            factor: "중장기 재무·재무비율 추정 방법론의 적정성",
+            maxScore: 20, // 한수원 과제 특성상 이 항목 비중 상향
+            score: 17,
+          },
+          {
+            category: "기술·지식능력",
+            factor: "에너지·전력 시장 및 규제 환경에 대한 이해도",
+            maxScore: 10,
+            score: 8,
+          },
+          {
+            category: "인력·조직·관리기술",
+            factor: "재무·전략·에너지 전문가로 구성된 팀의 적정성",
+            maxScore: 10,
+            score: 7,
+          },
+          {
+            category: "인력·조직·관리기술",
+            factor: "사업수행조직체계 및 의사결정 구조의 명확성",
+            maxScore: 10,
+            score: 8,
+          },
+          {
+            category: "사업 수행 계획",
+            factor: "시나리오 설정(원전·신재생·수요전망 등)의 합리성",
+            maxScore: 10,
+            score: 7,
+          },
+          {
+            category: "사업 수행 계획",
+            factor: "프로젝트 일정 및 단계별 산출물 계획의 구체성",
+            maxScore: 10,
+            score: 6,
+          },
+          {
+            category: "수행실적",
+            factor: "발전사·공기업 대상 재무모델링·밸류에이션 수행 경험",
+            maxScore: 10,
+            score: 7,
+          },
+        ],
+        strengths: [
+          "중장기 재무전망을 위한 시나리오 기반 재무모델 구조가 잘 설계되어 있으며, 주요 재무비율(부채비율, 이자보상배율 등)에 대한 모니터링 체계가 포함되어 있습니다.",
+          "발전사 및 공기업 대상 재무모델링·밸류에이션 수행 경험을 갖춘 인력이 포함되어 있어, 한수원 특성에 맞춘 해석과 인사이트 도출이 가능해 보입니다.",
+        ],
+        gaps: [
+          "시장제도 변화(전력시장 구조 개편, 탄소중립 정책 강화 등)에 따른 재무전망 시나리오 민감도 분석 범위가 상대적으로 좁게 제시되어 있습니다.",
+          "신규 투자·감가상각, 자본조달 전략(채권 발행, 증자 등)에 대한 가정이 고정값으로 제시되어 있어, 실제 경영전략 선택과의 연결성이 더 강조되면 좋습니다.",
+        ],
+        risks: [
+          "중장기 예측 특성상 불확실성이 높음에도 불구하고, ‘베이스라인 시나리오’에 대한 의존도가 크면, 향후 경영진 의사결정에 잘못된 신호를 줄 수 있는 리스크가 존재합니다.",
+          "국내외 규제 환경 변화(택소노미, 원전 관련 정책 등)가 급변할 경우, 재무전망의 재검토 주기와 방법론을 사전에 합의해 두지 않으면, 모델의 활용도가 떨어질 수 있습니다.",
+        ],
+      },
+    };
   },
+
+  // 나머지 addProject, getProject, upsertEvaluation, getEvaluation, removeProject 등은 그대로 두면 돼
+};
+
 
   addProject(name, description) {
     const id = "p" + Date.now();
@@ -201,91 +345,179 @@ const UI = {
     `;
   },
 
-  renderEvaluation(projectId) {
-    const container = document.getElementById("evaluation-results");
-    const data = State.getEvaluation(projectId);
-    if (!container) return;
+renderEvaluation(projectId) {
+  const container = document.getElementById("evaluation-results");
+  const data = State.getEvaluation(projectId);
 
-    if (!data || !data.matchingScore) {
-      container.innerHTML = `
-        <div class="border rounded-lg bg-white px-4 py-5 text-sm text-gray-600">
-          선택한 프로젝트에 대해 아직 RFP와 제안서가 모두 업로드/분석되지 않았습니다.<br>
-          <span class="text-gray-500">
-            문서 업로드 탭에서 RFP와 제안서를 업로드한 후 다시 확인해 주세요.
-          </span>
-        </div>
-      `;
-      return;
-    }
+  if (!container) return;
 
-    const project = State.getProject(projectId);
-    const projectName = project ? project.name : projectId;
-    const score = data.matchingScore;
-    const scoreColor =
-      score >= 90 ? "bg-green-600" : score >= 80 ? "bg-emerald-500" : "bg-amber-500";
-
-    const strengths = (data.strengths || [])
-      .map((s) => `<li class="mb-1">• ${s}</li>`)
-      .join("");
-    const gaps = (data.gaps || [])
-      .map((g) => `<li class="mb-1">• ${g}</li>`)
-      .join("");
-    const risks = (data.risks || [])
-      .map((r) => `<li class="mb-1">• ${r}</li>`)
-      .join("");
-
+  if (!data) {
     container.innerHTML = `
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- 매칭도 카드 -->
-        <div class="md:col-span-1 border rounded-lg bg-white p-5 shadow-sm">
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">프로젝트</p>
-          <p class="text-sm font-bold text-gray-800 mb-4">${projectName}</p>
-
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">RFP 대비 매칭도</p>
-          <div class="mt-1 mb-2 flex items-end justify-between">
-            <span class="text-3xl font-extrabold text-gray-900">${score}%</span>
-            <span class="text-xs text-gray-500">커버리지 기준 정성평가</span>
-          </div>
-
-          <div class="w-full h-3 rounded-full bg-gray-200 overflow-hidden">
-            <div class="h-full ${scoreColor}" style="width: ${Math.min(score, 100)}%;"></div>
-          </div>
-
-          <p class="text-xs text-gray-500 mt-3">
-            RFP에서 정의된 주요 평가 항목 대비 제안서 내용 커버리지 수준을 정성적으로 환산한 지표입니다.
-          </p>
-        </div>
-
-        <!-- 강점 -->
-        <div class="md:col-span-1 border rounded-lg bg-white p-5 shadow-sm">
-          <p class="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2">
-            강점 (Strengths)
-          </p>
-          <ul class="text-sm text-gray-700">
-            ${strengths || "<li class='text-gray-400'>등록된 강점 내역이 없습니다.</li>"}
-          </ul>
-        </div>
-
-        <!-- 보완 / 리스크 -->
-        <div class="md:col-span-1 border rounded-lg bg-white p-5 shadow-sm">
-          <p class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2">
-            보완 필요 (Gaps)
-          </p>
-          <ul class="text-sm text-gray-700 mb-4">
-            ${gaps || "<li class='text-gray-400'>등록된 보완 내역이 없습니다.</li>"}
-          </ul>
-
-          <p class="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2">
-            리스크 포인트 (Risks)
-          </p>
-          <ul class="text-sm text-gray-700">
-            ${risks || "<li class='text-gray-400'>등록된 리스크 내역이 없습니다.</li>"}
-          </ul>
-        </div>
+      <div class="border rounded-lg p-6 bg-white text-gray-500 text-sm">
+        아직 이 프로젝트에 대한 평가 결과가 없습니다.
+        상단에서 프로젝트를 선택하고 RFP·제안서를 업로드해 보세요.
       </div>
     `;
-  },
-};
+    return;
+  }
+
+  const project = State.getProject(projectId);
+  const title = project ? project.name : `프로젝트 ${projectId}`;
+
+  const matchingScore = data.matchingScore ?? 0;
+
+  // 세부 항목 점수(backend에서 내려온 factors, totalScore, totalMaxScore)
+  const factors = Array.isArray(data.factors) ? data.factors : [];
+  const totalScore =
+    typeof data.totalScore === "number"
+      ? data.totalScore
+      : factors.reduce((sum, f) => sum + (f.score || 0), 0);
+  const totalMaxScore =
+    typeof data.totalMaxScore === "number"
+      ? data.totalMaxScore
+      : factors.reduce((sum, f) => sum + (f.maxScore || 0), 0);
+
+  const strengths = data.strengths || [];
+  const gaps = data.gaps || [];
+  const risks = data.risks || [];
+
+  // 세부 항목 점수 테이블 HTML
+  const factorsHtml = factors.length
+    ? `
+    <div class="mt-4 border rounded-lg bg-white p-4 shadow-sm">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-semibold text-gray-800 text-sm">세부 평가 항목별 점수</h3>
+        <span class="text-xs text-gray-500">
+          총점 ${totalScore}/${totalMaxScore}점 · 매칭도 ${matchingScore}%
+        </span>
+      </div>
+      <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+        ${factors
+          .map((f) => {
+            const score = f.score ?? 0;
+            const max = f.maxScore ?? 0;
+            const ratio = max > 0 ? Math.round((score / max) * 100) : 0;
+            return `
+              <div class="text-xs">
+                <div class="flex justify-between mb-1">
+                  <span class="font-medium text-gray-700">
+                    [${f.category}] ${f.factor}
+                  </span>
+                  <span class="text-gray-600">
+                    ${score}/${max}점 (${ratio}%)
+                  </span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                  <div
+                    class="h-1.5 rounded-full bg-[#e57200]"
+                    style="width: ${ratio}%;"
+                  ></div>
+                </div>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `
+    : `
+    <div class="mt-4 border rounded-lg bg-white p-4 shadow-sm text-xs text-gray-500">
+      세부 항목별 점수 정보는 아직 없습니다.
+    </div>
+  `;
+
+  container.innerHTML = `
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">${title} · 기술평가 결과</h2>
+          ${
+            data.proposalFileName
+              ? `<p class="text-xs text-gray-500 mt-1">제안서: ${data.proposalFileName}</p>`
+              : ""
+          }
+          ${
+            data.rfpFileName
+              ? `<p class="text-xs text-gray-400">RFP: ${data.rfpFileName}</p>`
+              : ""
+          }
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- 왼쪽: 매칭도 + 세부 항목 점수 -->
+        <div class="md:col-span-2 space-y-4">
+          <!-- 매칭도 카드 -->
+          <div class="border rounded-lg bg-white p-6 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-[#8C1D40] mb-1">RFP 대비 매칭도</p>
+              <p class="text-4xl font-bold text-gray-900">${matchingScore}<span class="text-2xl">%</span></p>
+              <p class="text-xs text-gray-500 mt-1">
+                RFP에서 정의한 정성평가 항목을 기준으로 산정된 총합 점수입니다.
+              </p>
+            </div>
+            <div class="w-24 h-24 rounded-full border-4 border-[#8C1D40]/20 flex items-center justify-center">
+              <div class="w-20 h-20 rounded-full border-4 border-[#e57200]/80 flex items-center justify-center">
+                <span class="text-lg font-semibold text-gray-800">${matchingScore}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 세부 항목별 점수 카드 -->
+          ${factorsHtml}
+        </div>
+
+        <!-- 오른쪽: 강점 + 보완/리스크 -->
+        <div class="space-y-4">
+          <!-- 강점 카드 -->
+          <div class="border rounded-lg bg-white p-4 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">
+              <i class="fas fa-check-circle text-[#e57200] mr-1"></i>
+              강점 (Strengths)
+            </h3>
+            ${
+              strengths.length
+                ? `<ul class="list-disc ml-4 space-y-1 text-xs text-gray-700">
+                    ${strengths.map((s) => `<li>${s}</li>`).join("")}
+                   </ul>`
+                : `<p class="text-xs text-gray-500">등록된 강점 정보가 없습니다.</p>`
+            }
+          </div>
+
+          <!-- 보완 필요 + 리스크 카드 -->
+          <div class="border rounded-lg bg-white p-4 shadow-sm space-y-3">
+            <div>
+              <h3 class="text-sm font-semibold text-gray-800 mb-1">
+                <i class="fas fa-exclamation-circle text-[#8C1D40] mr-1"></i>
+                보완 필요 항목 (Gaps)
+              </h3>
+              ${
+                gaps.length
+                  ? `<ul class="list-disc ml-4 space-y-1 text-xs text-gray-700">
+                      ${gaps.map((g) => `<li>${g}</li>`).join("")}
+                     </ul>`
+                  : `<p class="text-xs text-gray-500">보완 필요 항목이 없습니다.</p>`
+              }
+            </div>
+            <div class="border-t pt-2">
+              <h3 class="text-sm font-semibold text-gray-800 mb-1">
+                <i class="fas fa-triangle-exclamation text-amber-500 mr-1"></i>
+                리스크 (Risks)
+              </h3>
+              ${
+                risks.length
+                  ? `<ul class="list-disc ml-4 space-y-1 text-xs text-gray-700">
+                      ${risks.map((r) => `<li>${r}</li>`).join("")}
+                     </ul>`
+                  : `<p class="text-xs text-gray-500">추가로 인지된 리스크가 없습니다.</p>`
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
 /************************************************************
  *  CONTROLLER 레이어: 이벤트 핸들러

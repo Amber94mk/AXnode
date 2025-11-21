@@ -41,6 +41,11 @@ const State = {
   getEvaluation(projectId) {
     return this.evaluations[projectId];
   },
+
+    removeProject(id) {
+    this.projects = this.projects.filter((p) => p.id !== id);
+    delete this.evaluations[id];
+  },
 };
 
 /************************************************************
@@ -112,13 +117,24 @@ const UI = {
       listEl.innerHTML = projects
         .map(
           (p) => `
-        <div class="project-card border px-4 py-3 rounded-lg shadow-sm bg-gray-50 hover:bg-gray-100 cursor-pointer">
-          <p class="font-semibold text-gray-800">${p.name}</p>
-          <p class="text-sm text-gray-500">${p.description || "설명 없음"}</p>
+    <div class="project-card border px-4 py-3 rounded-lg shadow-sm bg-gray-50 hover:bg-gray-100">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="font-semibold text-gray-800">${p.name}</p>
+              <p class="text-sm text-gray-500">${p.description || "설명 없음"}</p>
+            </div>
+            <button
+              onclick="deleteProject('${p.id}')"
+              class="text-xs text-gray-400 hover:text-red-500 mt-1"
+              title="프로젝트 삭제"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
         </div>
       `
-        )
-        .join("");
+      )
+      .join("");
     }
 
     // 셀렉트 갱신
@@ -340,6 +356,39 @@ function createProject() {
   nameInput.value = "";
   descInput.value = "";
 }
+
+function deleteProject(projectId) {
+  const project = State.getProject(projectId);
+  const name = project ? project.name : projectId;
+
+  const ok = confirm(
+    `정말 이 프로젝트를 삭제할까요?\n\n- 프로젝트명: ${name}\n- 관련된 평가 결과도 함께 삭제됩니다.`
+  );
+  if (!ok) return;
+
+  // 상태에서 제거
+  State.removeProject(projectId);
+  UI.renderProjects();
+
+  // 업로드 탭 선택 초기화
+  const uploadSel = document.getElementById("upload-project-select");
+  if (uploadSel && uploadSel.value === projectId) {
+    uploadSel.value = "";
+    UI.setStatus("tech-spec-status", "");
+    UI.setStatus("bid-spec-status", "");
+    const docs = document.getElementById("documents-table");
+    if (docs) docs.innerHTML = "";
+  }
+
+  // 평가 탭 선택 초기화
+  const evalSel = document.getElementById("eval-project-select");
+  if (evalSel && evalSel.value === projectId) {
+    evalSel.value = "";
+    const evalCont = document.getElementById("evaluation-results");
+    if (evalCont) evalCont.innerHTML = "";
+  }
+}
+
 
 // 문서 업로드 (RFP / 제안서) – HTML에서 uploadDocument('tech_spec' | 'bid_spec') 호출
 async function uploadDocument(kind) {

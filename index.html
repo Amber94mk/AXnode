@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>입찰 기술평가 시스템</title>
+    <title>(AX NODE 지원 포트폴리오) 제안서 평가 시스템</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,20 +20,80 @@
         .tab-content.active {
             display: block;
         }
+
+        /* PwC 컬러 팔레트 */
+        :root {
+            --pwc-orange: #EB8C00;
+            --pwc-burgundy: #8C1D40;
+            --pwc-gray: #4B5563;
+            --pwc-light: #F4F4F4;
+        }
+
+        /* 탭 공통 스타일 */
+        .tab-btn {
+            border-bottom-width: 2px;
+            border-color: transparent;
+            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .tab-active {
+            color: var(--pwc-burgundy);
+            border-color: var(--pwc-orange);
+            background-color: #ffffff;
+        }
+
+        .tab-inactive {
+            color: var(--pwc-gray);
+        }
+
+        .tab-inactive:hover {
+            color: var(--pwc-orange);
+            background-color: #F9FAFB;
+        }
+
+        /* 주요 버튼 */
+        .btn-primary {
+            background-color: var(--pwc-orange);
+            color: #ffffff;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #c26b00;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--pwc-burgundy);
+            color: #ffffff;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6a162f;
+            transform: translateY(-1px);
+        }
+
+        /* 카드 강조 */
+        .project-card {
+            border-left: 4px solid var(--pwc-orange);
+        }
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-[#F4F4F4]">
     <div class="min-h-screen">
 
         <!-- 헤더 -->
-        <header class="bg-blue-600 text-white shadow-lg">
+        <header class="text-white shadow-lg bg-gradient-to-r from-[#8C1D40] via-[#B54708] to-[#EB8C00]">
             <div class="container mx-auto px-4 py-6">
-                <h1 class="text-3xl font-bold">
+                <h1 class="text-3xl font-bold flex items-center">
                     <i class="fas fa-clipboard-check mr-3"></i>
-                    제안서 평가 자동화 시스템
+                    공공기관 및 정부 제출용 제안서 평가 자동화 시스템
                 </h1>
-                <p class="text-blue-100 mt-2">AI 기반 제안요청서 분석 및 결과지 자동 생성</p>
+                <p class="text-orange-100 mt-2">
+                    에너지·환경 프로젝트 중심의 AI 기반 제안요청서 분석 및 정성평가 결과지 자동 생성 PoC
+                </p>
             </div>
         </header>
 
@@ -41,20 +101,23 @@
         <div class="container mx-auto px-4 mt-6">
             <div class="bg-white rounded-lg shadow-md">
 
-                <nav class="flex border-b">
+                <nav class="flex border-b bg-white">
                     <button onclick="switchTab('projects')" id="tab-projects"
-                        class="tab-btn px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-600">
-                        <i class="fas fa-folder-open mr-2"></i>프로젝트 관리
+                        class="tab-btn tab-active px-6 py-3 font-medium flex items-center gap-2">
+                        <i class="fas fa-folder-open"></i>
+                        프로젝트 관리
                     </button>
 
                     <button onclick="switchTab('upload')" id="tab-upload"
-                        class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-upload mr-2"></i>문서 업로드
+                        class="tab-btn tab-inactive px-6 py-3 font-medium flex items-center gap-2">
+                        <i class="fas fa-upload"></i>
+                        문서 업로드
                     </button>
 
                     <button onclick="switchTab('evaluation')" id="tab-evaluation"
-                        class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-600">
-                        <i class="fas fa-chart-bar mr-2"></i>평가 결과
+                        class="tab-btn tab-inactive px-6 py-3 font-medium flex items-center gap-2">
+                        <i class="fas fa-chart-bar"></i>
+                        평가 결과
                     </button>
                 </nav>
 
@@ -62,18 +125,24 @@
                 <div id="content-projects" class="tab-content active p-6">
 
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">프로젝트 목록</h2>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">프로젝트 목록</h2>
+                            <p class="text-sm text-gray-500 mt-1">
+                                입찰 공고·RFP별로 프로젝트를 생성하고, 제안서 평가 결과를 관리합니다.
+                            </p>
+                        </div>
 
                         <button onclick="showCreateProjectModal()"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                            <i class="fas fa-plus mr-2"></i>새 프로젝트
+                            class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            새 프로젝트
                         </button>
                     </div>
 
                     <div id="projects-list" class="space-y-4">
                         <div class="text-center py-8 text-gray-500">
                             <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
-                            <p>로딩 중...</p>
+                            <p>프로젝트 정보를 불러오는 중입니다...</p>
                         </div>
                     </div>
                 </div>
@@ -81,7 +150,10 @@
                 <!-- 문서 업로드 탭 -->
                 <div id="content-upload" class="tab-content p-6">
 
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">문서 업로드 및 파싱</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">문서 업로드 및 파싱</h2>
+                    <p class="text-sm text-gray-500 mb-6">
+                        제안요청서(RFP)와 당사 제안서를 업로드하면, AI가 요구사항 매칭도와 커버리지 갭을 분석합니다.
+                    </p>
 
                     <div class="mb-6">
                         <label class="block text-gray-700 font-medium mb-2">프로젝트 선택</label>
@@ -94,47 +166,59 @@
                     <div class="grid md:grid-cols-2 gap-6">
 
                         <!-- 제안요청서 업로드 -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                            <h3 class="text-lg font-bold mb-4">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
+                            <h3 class="text-lg font-bold mb-4 flex items-center">
                                 <i class="fas fa-file-alt text-red-500 mr-2"></i>
-                                제안요청서 (.pptx, .pdf)
+                                제안요청서 (RFP) 업로드 (.hwpx, .pdf)
                             </h3>
 
-                            <input type="file" id="tech-spec-file" accept=".pptx,.ppt,.pdf" class="mb-4 w-full">
+                            <p class="text-sm text-gray-500 mb-3">
+                                주요 요구사항, 평가 항목, 배점 구조를 파싱하여 구조화합니다.
+                            </p>
+
+                            <input type="file" id="tech-spec-file" accept=".hwpx,.pdf"
+                                class="mb-4 w-full text-sm border border-gray-200 rounded px-3 py-2 bg-white">
 
                             <button onclick="uploadDocument('tech_spec')"
-                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                                업로드 및 파싱
+                                class="w-full btn-primary px-4 py-2 rounded-lg text-sm font-semibold">
+                                업로드 및 요구사항 파싱
                             </button>
 
-                            <div id="tech-spec-status" class="mt-4 text-sm"></div>
+                            <div id="tech-spec-status" class="mt-4 text-sm text-gray-600"></div>
                         </div>
 
-                        <!-- 규격입찰서 업로드 -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                            <h3 class="text-lg font-bold mb-4">
+                        <!-- 제안서 업로드 -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
+                            <h3 class="text-lg font-bold mb-4 flex items-center">
                                 <i class="fas fa-file-alt text-green-500 mr-2"></i>
-                                규격입찰서 (.hwpx, .pdf, .xlsx)
+                                제안서 업로드 (.ppt, .pptx, .pdf)
                             </h3>
 
-                            <input type="text" id="vendor-name"
-                                placeholder="업체명 (선택사항 - 파일에서 자동 추출)"
-                                class="mb-2 w-full border border-gray-300 rounded px-3 py-2">
+                            <p class="text-sm text-gray-500 mb-3">
+                                당사 제안서 내용을 RFP 요구사항과 매칭하여 커버리지 및 미비 영역을 도출합니다.
+                            </p>
 
-                            <input type="file" id="bid-spec-file" accept=".hwpx,.pdf,.xlsx,.xls,.hwp,.txt"
-                                class="mb-4 w-full">
+                            <input type="text" id="client-name"
+                                placeholder="클라이언트명 (선택) – 예: 한국전력, 수소발전 입찰 3차"
+                                class="mb-2 w-full border border-gray-300 rounded px-3 py-2 text-sm">
+
+                            <input type="file" id="bid-spec-file" accept=".ppt,.pptx,.pdf"
+                                class="mb-4 w-full text-sm border border-gray-200 rounded px-3 py-2 bg-white">
 
                             <button onclick="uploadDocument('bid_spec')"
-                                class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                                업로드 및 평가
+                                class="w-full btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">
+                                업로드 및 매칭도 평가
                             </button>
 
-                            <div id="bid-spec-status" class="mt-4 text-sm"></div>
+                            <div id="bid-spec-status" class="mt-4 text-sm text-gray-600"></div>
                         </div>
                     </div>
 
                     <div id="documents-list" class="mt-8">
-                        <h3 class="text-lg font-bold mb-4">업로드된 문서</h3>
+                        <h3 class="text-lg font-bold mb-2">업로드된 문서</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            향후에는 프로젝트별 RFP·제안서 버전, 제출본/리허설본 이력을 관리할 수 있도록 확장 예정입니다.
+                        </p>
                         <div id="documents-table"></div>
                     </div>
 
@@ -143,7 +227,10 @@
                 <!-- 평가 결과 탭 -->
                 <div id="content-evaluation" class="tab-content p-6">
 
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">기술평가 결과</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">정성평가 결과</h2>
+                    <p class="text-sm text-gray-500 mb-6">
+                        평가 항목별 매칭도, 커버리지 갭, 리스크 포인트를 시각화하여 제안서 보완 방향을 제안합니다.
+                    </p>
 
                     <div class="mb-6">
                         <label class="block text-gray-700 font-medium mb-2">프로젝트 선택</label>
@@ -169,28 +256,30 @@
 
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
 
-            <h3 class="text-xl font-bold mb-4">새 프로젝트 생성</h3>
+            <h3 class="text-xl font-bold mb-4 text-gray-800">새 프로젝트 생성</h3>
 
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-2">프로젝트명</label>
                 <input type="text" id="new-project-name"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm"
+                    placeholder="예: 수소발전 입찰 3차 – A사 컨소시엄">
             </div>
 
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-2">설명</label>
                 <textarea id="new-project-description"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2" rows="3"></textarea>
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm" rows="3"
+                    placeholder="프로젝트 특이사항, 주요 평가 포인트, 내부 코드 등을 메모합니다."></textarea>
             </div>
 
             <div class="flex justify-end gap-2">
                 <button onclick="hideCreateProjectModal()"
-                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">
                     취소
                 </button>
 
                 <button onclick="createProject()"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    class="px-4 py-2 btn-primary rounded-lg text-sm font-semibold">
                     생성
                 </button>
             </div>

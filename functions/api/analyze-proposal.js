@@ -1,0 +1,38 @@
+// functions/api/analyze-proposal.js
+
+export async function onRequestPost(context) {
+  const { request } = context;
+  const formData = await request.formData();
+
+  const file = formData.get("file");
+  const projectId = formData.get("projectId");
+  const clientName = formData.get("clientName") || "클라이언트";
+
+  // TODO: 실제 버전에서는 file 내용을 바탕으로 AI 분석
+  // 지금은 랜덤한 매칭도 점수 + 더미 강점/보완/리스크 반환
+
+  const baseScore = 78;
+  const randomOffset = Math.floor(Math.random() * 10);
+  const score = baseScore + randomOffset;
+
+  const data = {
+    projectId,
+    proposalFileName: file ? file.name : "proposal.pdf",
+    matchingScore: score,
+    strengths: [
+      `${clientName} 대상 제안서의 핵심 기술·설계 내용이 RFP 요구사항과 높은 수준으로 정합됩니다.`,
+      "프로젝트 조직 및 수행 체계 설명이 구체적이며 책임·역할이 명확합니다.",
+    ],
+    gaps: [
+      "ESG·탄소중립 관련 정량 KPI와 모니터링 체계에 대한 설명이 부족합니다.",
+      "준공 이후 성능보증 범위와 유지보수 조건이 RFP 대비 다소 협소합니다.",
+    ],
+    risks: [
+      "송전망 연계 지연, 인허가 일정 리스크에 대한 대응 전략이 약하게 기술되어 있습니다.",
+    ],
+  };
+
+  return new Response(JSON.stringify(data), {
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+  });
+}

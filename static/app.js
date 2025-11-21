@@ -1,10 +1,14 @@
 /************************************************************
  *  STATE 레이어: 프로젝트 / 평가 결과 데이터 관리
  ************************************************************/
+// -----------------------------
+// 전역 상태 관리
+// -----------------------------
 const State = {
   projects: [],
   evaluations: {},
 
+  // 초기 샘플 프로젝트 + 샘플 평가결과
   init() {
     // 1) 샘플 프로젝트 두 개
     this.projects = [
@@ -21,9 +25,8 @@ const State = {
     ];
 
     // 2) 각 프로젝트별 미리 계산된 평가 결과
-    //    (세부 항목 점수 합계 → matchingScore와 일치하도록 설정)
     this.evaluations = {
-      // ✅ TEST 1: 총점 69/80 → 매칭도 86%
+      // TEST 1: 총점 69/80 → 매칭도 86%
       p1: {
         projectId: "p1",
         rfpFileName: "2025_산업통상자원부_에너지정책_연구용역_RFP.pdf",
@@ -88,7 +91,7 @@ const State = {
         ],
       },
 
-      // ✅ TEST 2: 배점 구조를 약간 다르게 + 총점 60/80 → 매칭도 75%
+      // TEST 2: 총점 60/80 → 매칭도 75%
       p2: {
         projectId: "p2",
         rfpFileName: "2025_한국수력원자력_중장기_재무전망_추정용역_RFP.pdf",
@@ -156,15 +159,10 @@ const State = {
     };
   },
 
-  // 나머지 addProject, getProject, upsertEvaluation, getEvaluation, removeProject 등은 그대로 두면 돼
-};
-
-
   addProject(name, description) {
-    const id = "p" + Date.now();
-    const project = { id, name, description };
-    this.projects.push(project);
-    return project;
+    const id = "p" + (this.projects.length + 1);
+    this.projects.push({ id, name, description });
+    return id;
   },
 
   getProject(id) {
@@ -172,25 +170,21 @@ const State = {
   },
 
   upsertEvaluation(projectId, partial) {
-    if (!this.evaluations[projectId]) {
-      this.evaluations[projectId] = { projectId };
-    }
-    this.evaluations[projectId] = {
-      ...this.evaluations[projectId],
-      ...partial,
-    };
+    const prev = this.evaluations[projectId] || { projectId };
+    this.evaluations[projectId] = { ...prev, ...partial };
     return this.evaluations[projectId];
   },
 
   getEvaluation(projectId) {
-    return this.evaluations[projectId];
+    return this.evaluations[projectId] || null;
   },
 
-    removeProject(id) {
+  removeProject(id) {
     this.projects = this.projects.filter((p) => p.id !== id);
     delete this.evaluations[id];
   },
 };
+
 
 /************************************************************
  *  SERVICE 레이어: 나중에 백엔드/AI API 붙일 자리

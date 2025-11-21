@@ -53,48 +53,37 @@ const State = {
  *  지금은 더미 Promise 로직만 있음
  ************************************************************/
 const Service = {
-  // RFP 업로드/분석 (지금은 더미. 나중에 fetch 로 백엔드 호출)
   async analyzeRfp({ projectId, file }) {
-    // TODO: 여기에 fetch("/api/rfp", ...) 붙이면 됨
-    // 데모용: 1.2초 딜레이 후 더미 데이터 반환
-    await delay(1200);
+    const formData = new FormData();
+    formData.append("projectId", projectId);
+    formData.append("file", file);
 
-    return {
-      rfpFileName: file.name,
-      rfpSummary:
-        "RFP에서 12개의 평가 항목과 3개의 주요 리스크(일정, 인허가, 성능보증)를 추출했습니다.",
-      categories: [
-        { name: "기술·설계 적정성", weight: 40 },
-        { name: "사업수행·인력 구성", weight: 30 },
-        { name: "일정·리스크 관리", weight: 20 },
-        { name: "ESG·사회적 가치", weight: 10 },
-      ],
-    };
+    const res = await fetch("/api/analyze-rfp", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("RFP 분석 API 호출 실패");
+    }
+    return await res.json();
   },
 
-  // 제안서 업로드/분석
-  async analyzeProposal({ projectId, file }) {
-    await delay(1200);
+  async analyzeProposal({ projectId, file, clientName }) {
+    const formData = new FormData();
+    formData.append("projectId", projectId);
+    formData.append("file", file);
+    if (clientName) formData.append("clientName", clientName);
 
-    const baseScore = 78;
-    const randomOffset = Math.floor(Math.random() * 10);
-    const score = baseScore + randomOffset;
+    const res = await fetch("/api/analyze-proposal", {
+      method: "POST",
+      body: formData,
+    });
 
-    return {
-      proposalFileName: file.name,
-      matchingScore: score,
-      strengths: [
-        "핵심 기술·설계 부분이 RFP 요구사항과 높은 수준으로 정합됨",
-        "프로젝트 조직 및 수행 체계 설명이 구체적이며 책임·역할이 명확함",
-      ],
-      gaps: [
-        "ESG·탄소중립 관련 정량 목표 및 KPI 제시가 부족함",
-        "준공 이후 성능보증 및 유지보수 범위가 RFP 대비 다소 협소함",
-      ],
-      risks: [
-        "송전망 연계 일정 지연 시 공기 리스크에 대한 대응 전략이 약함",
-      ],
-    };
+    if (!res.ok) {
+      throw new Error("제안서 분석 API 호출 실패");
+    }
+    return await res.json();
   },
 };
 
@@ -409,6 +398,13 @@ async function uploadDocument(kind) {
 
   const file = fileInput.files[0];
 
+  // 제안서일 때만 클라이언트명 같이 보냄
+  let clientName = "";
+  if (!isRfp) {
+    const clientNameInput = document.getElementById("client-name");
+    clientName = clientNameInput ? clientNameInput.value.trim() : "";
+  }
+
   UI.setStatus(
     statusId,
     `<span class="text-gray-600">
@@ -418,8 +414,10 @@ async function uploadDocument(kind) {
   );
 
   try {
+    let result;
     if (isRfp) {
-      const result = await Service.analyzeRfp({ projectId, file });
+      // RFP 분석 API 호출 (또는 더미 Service)
+      result = await Service.analyzeRfp({ projectId, file });
       State.upsertEvaluation(projectId, result);
 
       UI.setStatus(
@@ -430,7 +428,8 @@ async function uploadDocument(kind) {
         </span>`
       );
     } else {
-      const result = await Service.analyzeProposal({ projectId, file });
+      // 제안서 분석 API 호출 (또는 더미 Service)
+      result = await Service.analyzeProposal({ projectId, file, clientName });
       State.upsertEvaluation(projectId, result);
 
       UI.setStatus(
@@ -442,9 +441,10 @@ async function uploadDocument(kind) {
       );
     }
 
-    // 업로드된 문서 / 평가 결과 갱신
+    // 업로드된 문서 섹션 갱신
     UI.renderDocuments(projectId);
 
+    // 평가 탭에서 현재 같은 프로젝트가 선택되어 있다면, 결과도 함께 갱신
     const evalSelected = document.getElementById("eval-project-select").value;
     if (evalSelected === projectId) {
       UI.renderEvaluation(projectId);
@@ -460,6 +460,8 @@ async function uploadDocument(kind) {
     );
   }
 }
+
+
 
 // 평가 탭에서 프로젝트 선택 변경 시
 function loadEvaluations() {
